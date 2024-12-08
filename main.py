@@ -1,41 +1,14 @@
 import cv2
-import numpy as np
 from ultralytics import YOLO  # Thư viện YOLOv8
 
 # Load the YOLO model
 def load_model(model_path='yolov8s.pt'):
     try:
-        # Tải model YOLO
-        model = YOLO(model_path)  # Đảm bảo bạn đã cài ultralytics
+        model = YOLO(model_path)
         print(f"Model '{model_path}' loaded successfully.")
         return model
     except Exception as e:
         print(f"Error loading model: {e}")
-        exit(1)
-
-# Train the YOLO model with ShanghaiTech dataset
-def train_model():
-    try:
-        # Đường dẫn cấu hình dataset
-        dataset_config = 'shanghaitech.yaml'  # Tệp cấu hình dữ liệu YOLO
-        
-        # Tải model YOLO
-        model = YOLO('yolov8s.pt')  # Sử dụng trọng số pre-trained
-
-        # Huấn luyện model
-        model.train(
-            data=dataset_config,
-            epochs=50,           # Số epoch
-            batch=16,            # Kích thước batch
-            imgsz=640,           # Kích thước ảnh đầu vào
-            device=0,            # Sử dụng GPU (0: GPU đầu tiên)
-            name='yolov8s_shanghaitech',  # Tên phiên huấn luyện
-            verbose=True
-        )
-        print("Training completed.")
-        return model
-    except Exception as e:
-        print(f"Error during training: {e}")
         exit(1)
 
 # Process a single image
@@ -93,20 +66,16 @@ def process_video(video_path, model):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    action = input("Enter action (train/image/video): ").strip().lower()
+    action = input("Enter action (image/video): ").strip().lower()
 
-    if action == "train":
-        print("Starting training...")
-        train_model()
-    elif action == "image":
-        model_path = input("Enter the trained model path (default: 'yolov8s.pt'): ").strip() or 'yolov8s.pt'
-        model = load_model(model_path)
+    model_path = input("Enter the trained model path (default: 'yolov8s.pt'): ").strip() or 'yolov8s.pt'
+    model = load_model(model_path)
+
+    if action == "image":
         file_path = input("Enter the path to the image: ").strip()
         process_image(file_path, model)
     elif action == "video":
-        model_path = input("Enter the trained model path (default: 'yolov8s.pt'): ").strip() or 'yolov8s.pt'
-        model = load_model(model_path)
         file_path = input("Enter the path to the video: ").strip()
         process_video(file_path, model)
     else:
-        print("Invalid action. Please enter 'train', 'image', or 'video'.")
+        print("Invalid action. Please enter 'image' or 'video'.")
