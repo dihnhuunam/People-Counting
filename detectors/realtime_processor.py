@@ -5,6 +5,12 @@ from .analyzer import Analyzer
 
 class RealtimeProcessor(BaseProcessor):
     def process_webcam(self):
+        """
+        @brief Process real-time video stream from the default webcam
+        
+        Captures video from the default camera, detects people, draws bounding boxes,
+        and displays real-time density analysis. Exits when 'q' is pressed.
+        """
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
             print("Error: Unable to access the webcam.")

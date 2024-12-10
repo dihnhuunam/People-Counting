@@ -4,24 +4,22 @@ import cv2
 class Analyzer:
     def __init__(self, frame_width, frame_height):
         """
-        Analyzer to analyze density and count.
-
-        Args:
-            frame_width (int): Frame width in pixels.
-            frame_height (int): Frame height in pixels.
+        @brief Initialize the Analyzer with frame dimensions
+        
+        @param frame_width (int): Width of the video/image frame in pixels
+        @param frame_height (int): Height of the video/image frame in pixels
         """
         self.frame_width = frame_width
         self.frame_height = frame_height
 
     def calculate_density(self, people):
         """
-        Calculate density based on the total area of bounding boxes.
-
-        Args:
-            people (list): List of detected people with bounding boxes.
-
-        Returns:
-            float: Density of people as a percentage.
+        @brief Calculate the density of people in the frame
+        
+        Calculates the total area occupied by people as a percentage of the frame area
+        
+        @param people (list): List of detected people with their bounding box coordinates
+        @return float: Density percentage, representing how much of the frame is occupied by people
         """
         frame_area = self.frame_width * self.frame_height
         if frame_area == 0:
@@ -38,14 +36,12 @@ class Analyzer:
 
     def get_density_label(self, density_percentage):
         """
-        Get the density label based on percentage.
-
-        Args:
-            density_percentage (float): Density percentage.
-
-        Returns:
-            str: Density label ('Sparse', 'Medium', 'Crowded').
-            tuple: RGB color for the label.
+        @brief Determine the density label and corresponding color based on percentage
+        
+        @param density_percentage (float): Calculated density percentage
+        @return tuple: A tuple containing:
+            - str: Density label ('Sparse', 'Medium', 'Crowded')
+            - tuple: RGB color corresponding to the density (Red for crowded, Yellow for medium, Green for sparse)
         """
         if density_percentage > 30:
             return "Crowded", (0, 0, 255)  # Red for crowded
@@ -56,11 +52,12 @@ class Analyzer:
 
     def display_analysis(self, frame, people):
         """
-        Display analysis info on the frame.
-
-        Args:
-            frame (numpy.ndarray): Input frame.
-            people (list): List of detected people with bounding boxes.
+        @brief Display density and people count analysis on the frame
+        
+        Annotates the input frame with total number of people and density information
+        
+        @param frame (numpy.ndarray): Input video/image frame to annotate
+        @param people (list): List of detected people with their bounding box coordinates
         """
         total_people = len(people)
         density_percentage = self.calculate_density(people)

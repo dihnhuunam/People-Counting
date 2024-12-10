@@ -5,6 +5,13 @@ from .analyzer import Analyzer
 
 class ImageProcessor(BaseProcessor):
     def process_image(self, image_path):
+        """
+        @brief Process and analyze an input image for person detection
+        
+        Loads an image, detects people, draws bounding boxes, and displays analysis
+        
+        @param image_path (str): File path to the input image
+        """
         frame = cv2.imread(image_path)
         if frame is None:
             print(f"Error: Unable to load image from {image_path}")

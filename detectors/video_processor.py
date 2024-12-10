@@ -5,6 +5,14 @@ from .analyzer import Analyzer
 
 class VideoProcessor(BaseProcessor):
     def process_video(self, video_path):
+        """
+        @brief Process a video file for person detection
+        
+        Reads a video file, detects people in each frame, draws bounding boxes,
+        and displays real-time density analysis. Exits when 'q' is pressed.
+        
+        @param video_path (str): File path to the input video
+        """
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             print(f"Error: Unable to open video file {video_path}")
