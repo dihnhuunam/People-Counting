@@ -34,14 +34,14 @@ This application uses a YOLOv8 model to detect people in images, videos, or real
 The application is organized as follows:
 
 ```
-.
-├── main.py                # Entry point of the program
+├── main.py                      # Entry point of the program
 ├── detectors
-│   ├── image_processor.py # Class for processing images
-│   ├── video_processor.py # Class for processing videos
-│   ├── realtime_processor.py # Class for real-time webcam feed
-│   ├── analyzer.py        # Class for analyzing crowd density and statistics
-└── README.md              # Documentation file
+│   ├── image_processor.py       # Class for processing images
+│   ├── video_processor.py       # Class for processing videos
+│   ├── realtime_processor.py    # Class for real-time webcam feed
+│   ├── analyzer.py              # Class for analyzing crowd density and statistics
+├── requirements.txt             # Packages 
+└── README.md                    # Documentation file
 ```
 
 ## Usage
