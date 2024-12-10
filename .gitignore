@@ -163,3 +163,4 @@ cython_debug/
 
 dataset
 yolov8x.pt
+test
