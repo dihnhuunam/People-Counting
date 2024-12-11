@@ -2,11 +2,11 @@
 from ultralytics import YOLO
 
 class BaseProcessor:
-    def __init__(self, model_path='yolov8x.pt'):
+    def __init__(self, model_path='yolov8n.pt'):
         """
         @brief Initialize the BaseProcessor with a YOLOv8 model
         
-        @param model_path (str, optional): Path to the YOLOv8 model weights. Defaults to 'yolov8x.pt'
+        @param model_path (str, optional): Path to the YOLOv8 model weights. Defaults to 'yolov8n.pt'
         """
         self.model = YOLO(model_path)
 
