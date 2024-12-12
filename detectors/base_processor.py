@@ -2,7 +2,7 @@
 from ultralytics import YOLO
 
 class BaseProcessor:
-    def __init__(self, model_path='yolov8n.pt'):
+    def __init__(self, model_path='best.pt'):
         """
         @brief Initialize the BaseProcessor with a YOLOv8 model
         
@@ -23,6 +23,6 @@ class BaseProcessor:
         for r in results[0].boxes.data.tolist():
             x1, y1, x2, y2, conf, cls = r
             class_name = self.model.names[int(cls)]
-            if class_name == 'person':
+            if class_name == 'people':
                 people.append((x1, y1, x2, y2, conf, class_name))
         return people
