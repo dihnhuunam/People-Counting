@@ -68,7 +68,7 @@ python main.py
 
 - Follow the prompts to input the image or video path if applicable.
 
-## Output
+### Output
 
 - Bounding boxes and confidence scores are drawn around detected people.
 
@@ -91,9 +91,59 @@ docker build -t people-counting .
 
 2. Run the container:
 
+- For image processing:
+
 ```bash
-docker run -it --rm people-counting
+docker run -it --rm \
+  -v $(pwd)/data/images:/app/data/images \
+  people-counting
 ```
+
+- For video processing:
+
+```bash
+docker run -it --rm \
+  -v $(pwd)/data/videos:/app/data/videos \
+  people-counting
+  ```
+
+- For realtime camera:
+
+  ```bash
+  docker run -it --rm \
+  --device=/dev/video0:/dev/video0 \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  people-counting
+  ```
+
+Note: For webcam access on Linux, you might need to run xhost +local:docker first to allow Docker container to access X server.
+
+## Usage Instructions
+
+- Select the desired processing mode:
+
+1. Real-time camera feed
+2. Analyze a video file
+3. Process an image
+
+- For image/video processing, place your files in the respective mounted directories:
+  - Images: ./data/images/
+  - Videos: ./data/videos/
+
+- When prompted, enter the path relative to the mounted directory (e.g., "data/images/sample.jpg")
+
+### Output
+
+- Bounding boxes and confidence scores are drawn around detected people.
+- Displays:
+
+1. Total People: The total number of detected individuals.
+2. Density: The percentage of frame area occupied by detected people, with a density classification:
+
+- Sparse (Green): Density ≤ 10%.
+- Medium (Yellow): 10% < Density ≤ 30%.
+- Crowded (Red): Density > 30%.
 
 ## Acknowledgments
 
