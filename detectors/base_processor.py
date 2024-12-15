@@ -23,6 +23,6 @@ class BaseProcessor:
         for r in results[0].boxes.data.tolist():
             x1, y1, x2, y2, conf, cls = r
             class_name = self.model.names[int(cls)]
-            if class_name == 'people':
+            if class_name.lower() in ['person', 'people']:
                 people.append((x1, y1, x2, y2, conf, class_name))
         return people
