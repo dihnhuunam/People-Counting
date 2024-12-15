@@ -49,6 +49,56 @@ The application is organized as follows:
 └── requirements.txt
 ```
 
+## Dataset Download and Preparation
+
+### Downloading the Dataset
+
+1. Manual Download:
+
+- Click on the Google Drive link: Crowd Counting Dataset
+- Download the dataset zip file
+
+2. Automated Download (Recommended):
+You can use the following bash script to download the dataset:
+
+```bash
+#!/bin/bash
+
+# Create data directory if it doesn't exist
+mkdir -p data/dataset
+
+# Download dataset using gdown (ensure gdown is installed)
+pip install gdown
+gdown https://drive.google.com/uc?id=1Wr2L25d6XlGvYSsRbUCttXYBZRWwkp0B -O data/dataset/crowd_counting_dataset.zip
+
+# Unzip the dataset
+unzip data/dataset/crowd_counting_dataset.zip -d data/dataset
+
+# Optional: Remove the zip file after extraction
+rm data/dataset/crowd_counting_dataset.zip
+```
+
+### Dataset Preparation
+
+After downloading, the dataset should be structured as follows:
+
+```
+data/
+└── dataset/
+    ├── images/
+    │   ├── train/
+    │   └── val/
+    └── labels/
+        ├── train/
+        └── val/
+```
+
+### Using the Dataset for Training
+
+- Verify the dataset structure
+- Update your training script to point to the correct dataset paths
+- When training the YOLOv8 model, use the paths to the train and validation sets
+
 ## Usage
 
 Running the Application
