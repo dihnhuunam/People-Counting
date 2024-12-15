@@ -1,93 +1,117 @@
 import os
+import random
+import matplotlib.pyplot as plt
+import cv2
 from ultralytics import YOLO
 
 def test_model(
     model_path='best.pt', 
-    source=None,  # Path to test images/video
-    conf=0.25,   # Confidence threshold
-    iou=0.45,    # IoU threshold
-    project='runs/test',  # Directory to save results
-    name='test_results',  # Results folder name
-    exist_ok=True  # Allow overwriting existing results
+    source=None,
+    conf=0.25,
+    iou=0.45,
+    project='runs/test',
+    name='test_results',
+    exist_ok=True
 ):
-    """
-    Test the model on a specific dataset or source
+    # Load the model
+    model = YOLO(model_path)
     
-    Args:
-        model_path (str): Path to the model weights
-        source (str, optional): Path to test images/video. 
-                                If None, will use default source from model
-        conf (float): Confidence threshold
-        iou (float): IoU threshold
-        project (str): Directory to save results
-        name (str): Results folder name
-        exist_ok (bool): Allow overwriting existing results
-    """
-    try:
-        # Validate input paths
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(f"Model weights not found: {model_path}")
-        
-        # Check source path if provided
-        if source and not os.path.exists(source):
-            raise FileNotFoundError(f"Test source not found: {source}")
-        
-        # Load the model
-        model = YOLO(model_path)
-        
-        # Perform prediction/testing
-        results = model.predict(
-            source=source,          # Test source (can be None)
-            conf=conf,              # Confidence threshold
-            iou=iou,                # IoU threshold
-            project=project,        # Results directory
-            name=name,              # Results folder name
-            exist_ok=exist_ok,      # Allow overwriting
-            save=True,              # Save prediction results
-            save_txt=True,          # Save results as txt files
-            save_conf=True,         # Save confidence scores
-            save_json=True          # Save results in COCO JSON format
-        )
-        
-        # Print testing summary
-        print("\n--- Model Testing Results ---")
-        print(f"Model: {model_path}")
-        print(f"Test Source: {source or 'Default'}")
-        
-        # Print summary of predictions
-        print("\nTesting Summary:")
-        print(f"Total predictions: {len(results)}")
-        
-        # Analyze predictions if results exist
-        if results:
-            # Count detections by class
-            class_counts = {}
-            for result in results:
-                if result.boxes is not None:
-                    for box in result.boxes:
-                        cls = int(box.cls[0])
-                        class_counts[cls] = class_counts.get(cls, 0) + 1
-            
-            print("\nDetection Counts by Class:")
-            for cls, count in class_counts.items():
-                print(f"Class {cls}: {count} detections")
-        
-        return results
-    
-    except Exception as e:
-        print(f"An error occurred during model testing: {e}")
-        raise
-
-def main():
-    # Paths configuration
-    MODEL_PATH = "best.pt"
-    TEST_SOURCE = None  # Specify path to test images/video, or None for default
-    
-    # Run model testing
-    test_model(
-        model_path=MODEL_PATH, 
-        source=TEST_SOURCE
+    # Perform prediction/testing
+    results = model.predict(
+        source=source,
+        conf=conf,
+        iou=iou,
+        project=project,
+        name=name,
+        exist_ok=exist_ok,
+        save=True,
+        save_txt=True,
+        save_conf=True,
+        save_json=True
     )
+    
+    return results
+
+def count_people(result):
+    """Count number of people detections in a result"""
+    if result.boxes is None:
+        return 0
+    
+    # Assuming class 0 is person
+    person_masks = result.boxes.cls == 0
+    return int(person_masks.sum())
+
+def test_random_images():
+    # Path to test images directory
+    test_images_dir = '/home/dihnhuunam/Workspace/People-Counting/dataset/test/images'
+    results_file = 'test_results.txt'
+    output_image_path = 'detection_results_with_count.png'
+    
+    try:
+        # Get list of all image files
+        image_files = [f for f in os.listdir(test_images_dir) 
+                      if f.endswith(('.jpg', '.jpeg', '.png'))]
+        
+        if len(image_files) < 4:
+            raise ValueError("Not enough images in the test directory")
+        
+        # Randomly select 4 images
+        selected_images = random.sample(image_files, 4)
+        
+        # Create figure with 2x2 subplots
+        fig, axes = plt.subplots(2, 2, figsize=(19.2, 10.8))  # Full HD display
+        fig.suptitle('Random Test Images Detection Results', fontsize=20)
+        
+        # Open file to save results
+        with open(results_file, 'w') as f:
+            f.write("Image Detection Results:\n")
+            f.write("-----------------------\n")
+            
+            # Process and display each image
+            for idx, image_file in enumerate(selected_images):
+                # Full path to image
+                image_path = os.path.join(test_images_dir, image_file)
+                print(f"\nProcessing image {idx + 1}: {image_file}")
+                
+                # Run model prediction
+                results = test_model(source=image_path)
+                
+                # Get the result image (assumes first result)
+                if results and len(results) > 0:
+                    # Count people in the image
+                    people_count = count_people(results[0])
+                    
+                    # Save result to file
+                    f.write(f"\nImage {idx + 1}: {image_file}\n")
+                    f.write(f"Number of people detected: {people_count}\n")
+                    
+                    # Convert result image to numpy array
+                    result_image = results[0].plot()
+                    result_image = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
+                    
+                    # Plot in appropriate subplot
+                    row = idx // 2
+                    col = idx % 2
+                    axes[row, col].imshow(result_image)
+                    axes[row, col].set_title(f'Image {idx + 1}: {image_file}\nPeople Count: {people_count}', fontsize=12)
+                    axes[row, col].axis('off')
+        
+        # Adjust layout and display
+        plt.tight_layout()
+        plt.savefig(output_image_path)  # Save the figure
+        plt.show()
+        
+        print(f"\nResults have been saved to {results_file}")
+        print(f"Detection result image saved to {output_image_path}")
+        
+    except FileNotFoundError as fnf_error:
+        print(f"File error: {fnf_error}")
+    except ValueError as val_error:
+        print(f"Value error: {val_error}")
+    except KeyboardInterrupt:
+        print("\nOperation canceled by user.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
-    main()
+    test_random_images()
