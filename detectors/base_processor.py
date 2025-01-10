@@ -2,7 +2,7 @@
 from ultralytics import YOLO
 
 class BaseProcessor:
-    def __init__(self, model_path='best.pt'):
+    def __init__(self, model_path='../best.pt'):
         """
         @brief Initialize the BaseProcessor with a YOLOv8 model
         

@@ -43,7 +43,7 @@ def count_people(result):
 
 def test_random_images():
     # Path to test images directory
-    test_images_dir = '/home/dihnhuunam/Workspace/People-Counting/dataset/test/images'
+    test_images_dir = '../test/images'
     results_file = 'test_results.txt'
     output_image_path = 'detection_results_with_count.png'
     
