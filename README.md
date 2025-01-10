@@ -1,201 +1,170 @@
-# People Detection and Density Analysis Application
 
-## Overview
+# Jetson Nano Environment Setup
 
-This application uses a YOLOv8 model to detect people in images, videos, or real-time camera feeds. It analyzes crowd density based on bounding box areas and provides visual feedback, such as the total number of people detected and density classification (Sparse, Medium, or Crowded).
+This guide provides a step-by-step process for setting up a Jetson Nano environment with essential tools, including CUDA, cuDNN, TensorRT, Python, and OpenCV.
 
-## Features
+---
 
-1. **Modular Design**:
-   - Separate classes for processing images, videos, and real-time camera feeds for better scalability.
-2. **People Detection**:
-   - Detect people using model YOLOv8n extra trained with **crowd counting dataset** and draw bounding boxes with confidence scores.
-3. **Crowd Density Analysis**:
-   - Calculate and display the density percentage.
-   - Classify density as **Sparse**, **Medium**, or **Crowded** with color-coded labels.
-4. **Flexible Input Options**:
-   - Process images, videos, or real-time camera feeds.
-5. **Extensible Architecture**:
-   - Easily extend functionality to detect other objects or analyze additional metrics.
+## Installed by Jetpack SDK
 
-## Installation
-
-### Prerequisites
-
-- Python 3.8+
-- Install the following dependencies:
-
-  ```bash
-  pip install -r requirements.txt
-  ```
-
-## Files Structure
-
-The application is organized as follows:
-
-```
-├── detectors
-│   ├── image_processor.py       
-│   ├── video_processor.py       
-│   ├── realtime_processor.py   
-│   └── analyzer.py               
-├── source
-│   ├── validate.py              
-│   ├── test.py                  
-│   └── main.py                 
-├── best.pt                      
-├── Dockerfile    
-├── README.md             
-└── requirements.txt
-```
-
-## Dataset Download and Preparation
-
-### Downloading the Dataset
-
-1. Manual Download:
-
-- Click on the Google Drive link: [Crowd Counting Dataset](https://drive.google.com/file/d/1Wr2L25d6XlGvYSsRbUCttXYBZRWwkp0B/view?usp=drive_link)
-- Download the dataset zip file
-
-2. Automated Download (Recommended):
-You can use the following bash script to download the dataset:
+- **CUDA Toolkit**: 10.2
+- **cuDNN**: 8.2.1
+- **TensorRT**: 8.2.1
+- **Environment Variables**: 
 
 ```bash
-#!/bin/bash
-
-# Create data directory if it doesn't exist
-mkdir -p data/dataset
-
-# Download dataset using gdown (ensure gdown is installed)
-pip install gdown
-gdown https://drive.google.com/uc?id=1Wr2L25d6XlGvYSsRbUCttXYBZRWwkp0B -O data/dataset/crowd_counting_dataset.zip
-
-# Unzip the dataset
-unzip data/dataset/crowd_counting_dataset.zip -d data/dataset
-
-# Optional: Remove the zip file after extraction
-rm data/dataset/crowd_counting_dataset.zip
+export PATH=$PATH:/usr/src/tensorrt/bin:/usr/local/cuda/bin
 ```
+---
 
-### Dataset Preparation
+## Install DeepStream
 
-After downloading, the dataset should be structured as follows:
-
-```
-data/
-└── dataset/
-    ├── images/
-    │   ├── train/
-    │   └── val/
-    └── labels/
-        ├── train/
-        └── val/
-```
-
-### Using the Dataset for Training
-
-- Verify the dataset structure
-- Update your training script to point to the correct dataset paths
-- When training the YOLOv8 model, use the paths to the train and validation sets
-
-## Usage
-
-Running the Application
-
-- Clone this repository and navigate to the project directory.
-- Run the main script
+### Step 1: Check Compatible DeepStream Version
 
 ```bash
-python main.py
+sudo apt-cache search deepstream
 ```
 
-- Select the desired processing mode:
-
-1. Real-time camera feed
-2. Analyze a video file
-3. Process an image
-
-- Follow the prompts to input the image or video path if applicable.
-
-### Output
-
-- Bounding boxes and confidence scores are drawn around detected people.
-
-- Displays:
-
-1. Total People: The total number of detected individuals.
-2. Density: The percentage of frame area occupied by detected people, with a density classification:
-
-   - Sparse (Green): Density ≤ 10%.
-   - Medium (Yellow): 10% < Density ≤ 30%.
-   - Crowded (Red): Density > 30%.
-
-## Docker Deployment
-
-1. Build the Docker image:
+### Step 2: Install DeepStream
 
 ```bash
-docker build -t people-counting .
+sudo apt install deepstream-6.0
 ```
 
-2. Run the container:
+---
 
-- For image processing:
+## Install Python
+
+### Step 1: Install Dependencies
 
 ```bash
-docker run -it --rm \
-  -v $(pwd)/data/images:/app/data/images \
-  people-counting
+sudo apt-get update
+sudo apt-get install -y build-essential libffi-dev libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+    libncursesw5-dev xz-utils tk-dev libgdbm-dev libnss3-dev liblzma-dev
 ```
 
-- For video processing:
+### Step 2: Download and Extract Python Source Code
+
+Download Python 3.9.17 source code from the official Python website:
 
 ```bash
-docker run -it --rm \
-  -v $(pwd)/data/videos:/app/data/videos \
-  people-counting
-  ```
+wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz
+tar -xf Python-3.9.17.tgz
+cd Python-3.9.17
+```
 
-- For realtime camera:
+### Step 3: Configure the Build for Optimization
 
-  ```bash
-  docker run -it --rm \
-  --device=/dev/video0:/dev/video0 \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  people-counting
-  ```
+```bash
+./configure --enable-optimizations
+```
 
-Note: For webcam access on Linux, you might need to run xhost +local:docker first to allow Docker container to access X server.
+### Step 4: Build and Install
 
-## Usage Instructions
+```bash
+make -j$(nproc)
+sudo make altinstall
+```
 
-- Select the desired processing mode:
+---
+### Step 5: Install Virtual Python Environment
+```bash
+python3.9 -m venv workenv                                                
+source workenv/bin/activate
+```
 
-1. Real-time camera feed
-2. Analyze a video file
-3. Process an image
+## Install OpenCV
 
-- For image/video processing, place your files in the respective mounted directories:
-  - Images: ./data/images/
-  - Videos: ./data/videos/
+### Step 1: Query GPU Compute Capability
 
-- When prompted, enter the path relative to the mounted directory (e.g., "data/images/sample.jpg")
+Run the following command to check the GPU compute capability, required for `CUDA_ARCH_BIN`:
 
-### Output
+```bash
+nvidia-smi --query-gpu=compute_cap --format=csv
+```
 
-- Bounding boxes and confidence scores are drawn around detected people.
-- Displays:
+### Step 2: Install Dependencies
 
-1. Total People: The total number of detected individuals.
-2. Density: The percentage of frame area occupied by detected people, with a density classification:
+```bash
+sudo apt-get install -y build-essential cmake git unzip pkg-config zlib1g-dev \
+libjpeg-dev libjpeg8-dev libjpeg-turbo8-dev libpng-dev libtiff-dev libglew-dev \
+libavcodec-dev libavformat-dev libswscale-dev libgtk2.0-dev libgtk-3-dev "libcanberra-gtk*" \
+python-dev python-numpy python-pip python3-dev python3-numpy python3-pip \
+libxvidcore-dev libx264-dev libtbb2 libtbb-dev libdc1394-22-dev libxine2-dev \
+gstreamer1.0-tools libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev \
+libv4l-dev v4l-utils v4l2ucp qv4l2 libtesseract-dev libpostproc-dev libavresample-dev \
+libvorbis-dev libfaac-dev libmp3lame-dev libtheora-dev libopencore-amrnb-dev \
+libopencore-amrwb-dev libopenblas-dev libatlas-base-dev libblas-dev \
+liblapack-dev liblapacke-dev libeigen3-dev gfortran libhdf5-dev libprotobuf-dev \
+protobuf-compiler libgoogle-glog-dev libgflags-dev -y
+```
 
-- Sparse (Green): Density ≤ 10%.
-- Medium (Yellow): 10% < Density ≤ 30%.
-- Crowded (Red): Density > 30%.
+### Step 3: Clone OpenCV Repositories
 
-## Acknowledgments
+```bash
+git clone https://github.com/opencv/opencv.git
+git clone https://github.com/opencv/opencv_contrib.git
+```
 
-- YOLOv8 by Ultralytics
-- OpenCV Library
+### Step 4: Checkout OpenCV Version 4.10.0
+
+```bash
+cd opencv_contrib
+git checkout 4.9.0
+cd ../opencv
+git checkout 4.9.0
+mkdir build && cd build
+```
+
+### Step 5: Configure and Build OpenCV
+
+Run the following `cmake` command with required flags:
+
+```bash
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+  -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib/modules \
+  -D EIGEN_INCLUDE_PATH=/usr/include/eigen3 \
+  -D WITH_OPENCL=OFF \
+  -D CUDA_ARCH_BIN=${ARCH} \
+  -D CUDA_ARCH_PTX=${PTX} \
+  -D WITH_CUDA=ON \
+  -D WITH_CUDNN=ON \
+  -D WITH_CUBLAS=ON \
+  -D ENABLE_FAST_MATH=ON \
+  -D CUDA_FAST_MATH=ON \
+  -D OPENCV_DNN_CUDA=ON \
+  -D ENABLE_NEON=ON \
+  -D WITH_QT=OFF \
+  -D WITH_OPENMP=ON \
+  -D BUILD_TIFF=ON \
+  -D WITH_FFMPEG=ON \
+  -D WITH_GSTREAMER=ON \
+  -D WITH_TBB=ON \
+  -D BUILD_TBB=ON \
+  -D BUILD_TESTS=OFF \
+  -D WITH_EIGEN=ON \
+  -D WITH_V4L=ON \
+  -D WITH_LIBV4L=ON \
+  -D WITH_PROTOBUF=ON \
+  -D OPENCV_ENABLE_NONFREE=ON \
+  -D INSTALL_C_EXAMPLES=OFF \
+  -D INSTALL_PYTHON_EXAMPLES=OFF \
+  -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
+  -D OPENCV_GENERATE_PKGCONFIG=ON \
+  -D BUILD_EXAMPLES=OFF \
+  -D CMAKE_CXX_FLAGS="-march=native -mtune=native" \
+  -D CMAKE_C_FLAGS="-march=native -mtune=native" ..
+```
+
+Compile and install:
+
+```bash
+sudo make install -j$(nproc)
+sudo ldconfig
+```
+Check OpenCV:
+```bash
+ls /usr/lib/aarch64-linux-gnu/ | grep opencv
+```
+---
